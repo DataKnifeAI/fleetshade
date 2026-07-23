@@ -23,10 +23,18 @@ GitHub / GitLab / (nodes · agents)     Dioptra site (SPA)
 
 ## Surfaces
 
-1. **Agent infra** — topology: GitHub / GitLab → Dioptra → Cursor & Hermes → Kubernetes  
-2. **Kubernetes nodes** — Ready / pressure, coarse CPU · mem  
-3. **Agent health** — Cursor (Coder + cloud) and Hermes (Enodios / vLLM)  
-4. **Issue backlog** — GitHub and GitLab issues, top 10 by priority per platform, with totals  
+**Fleet** tab (live):
+
+1. **Kubernetes nodes** — Ready / pressure, coarse CPU · mem  
+2. **Agent health** — Cursor (Coder + cloud) and Hermes (Enodios / vLLM)  
+3. **Issue backlog** — GitHub and GitLab issues, top 10 by priority per platform, with totals  
+
+**Setup** tab (diagrams):
+
+1. **Agent workspace setup** — Coder deploys template desktop spaces (`dkai-agent`, `dkai-arch`, `dkai-dev`, …) with tools/resources; outside router or inside vLLM via API  
+2. **Fleet wiring** — GitHub / GitLab → Dioptra → agents → Kubernetes  
+3. **How agents do work** — backlog → provision → reason → ship  
+
 
 ## Quick start (live API + site)
 

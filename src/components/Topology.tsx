@@ -9,8 +9,8 @@ export function Topology({ status }: Props) {
   return (
     <section className="panel wide">
       <div className="panel-head">
-        <h2>Agent infra</h2>
-        <span className="sub">What connects to what</span>
+        <h2>Fleet wiring</h2>
+        <span className="sub">Issues · agents · cluster</span>
       </div>
       <div className="topo-flow">
         <svg

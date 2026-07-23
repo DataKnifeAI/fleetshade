@@ -2,18 +2,36 @@ import { useEffect, useState } from "react";
 import { fetchStatus } from "./api";
 import type { FleetStatus } from "./types";
 import { formatUtc } from "./lib/format";
+import { TabNav, type AppTab } from "./components/TabNav";
 import { SummaryStrip } from "./components/SummaryStrip";
-import { Topology } from "./components/Topology";
 import { NodesPanel } from "./components/NodesPanel";
 import { AgentsPanel } from "./components/AgentsPanel";
 import { BacklogPanel } from "./components/BacklogPanel";
+import { SetupTab } from "./components/SetupTab";
 
 const DEFAULT_REFRESH = 30;
+
+function readTab(): AppTab {
+  const hash = window.location.hash.replace(/^#/, "");
+  return hash === "setup" ? "setup" : "fleet";
+}
 
 export default function App() {
   const [status, setStatus] = useState<FleetStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<AppTab>(readTab);
+
+  useEffect(() => {
+    const onHash = () => setTab(readTab());
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
+
+  function selectTab(next: AppTab) {
+    setTab(next);
+    window.location.hash = next === "fleet" ? "" : next;
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -50,7 +68,7 @@ export default function App() {
   }
 
   if (error && !status) {
-    return <div className="state error">Unable to load status.json — {error}</div>;
+    return <div className="state error">Unable to load status — {error}</div>;
   }
 
   if (!status) return null;
@@ -74,18 +92,27 @@ export default function App() {
         </div>
       </header>
 
-      <SummaryStrip status={status} />
+      <TabNav tab={tab} onChange={selectTab} />
 
-      <div className="grid">
-        <Topology status={status} />
-        <NodesPanel nodes={status.nodes} />
-        <AgentsPanel agents={status.agents} />
-        <BacklogPanel github={status.backlog.github} gitlab={status.backlog.gitlab} />
-      </div>
+      {tab === "fleet" ? (
+        <>
+          <SummaryStrip status={status} />
+          <div className="grid">
+            <NodesPanel nodes={status.nodes} />
+            <AgentsPanel agents={status.agents} />
+            <BacklogPanel
+              github={status.backlog.github}
+              gitlab={status.backlog.gitlab}
+            />
+          </div>
+        </>
+      ) : (
+        <SetupTab status={status} />
+      )}
 
       <footer className="note">
         <div>DIOPTRA · DataKnifeAI</div>
-        <div>{error ? `last error: ${error}` : "status.json"}</div>
+        <div>{error ? `last error: ${error}` : "/api/status"}</div>
       </footer>
     </div>
   );
