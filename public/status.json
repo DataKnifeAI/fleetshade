@@ -1,0 +1,249 @@
+{
+  "generatedAt": "2026-07-23T21:06:59.622Z",
+  "refreshSeconds": 30,
+  "summary": {
+    "nodesReady": 4,
+    "nodesTotal": 5,
+    "agentsOnline": 5,
+    "agentsCursor": 4,
+    "agentsHermes": 3,
+    "issuesOpen": 43,
+    "issuesGithub": 4,
+    "issuesGitlab": 39,
+    "inProgress": 5
+  },
+  "nodes": [
+    {
+      "name": "rke2-ctrl-01",
+      "role": "control-plane",
+      "status": "Ready",
+      "cpuPercent": 28,
+      "memPercent": 41
+    },
+    {
+      "name": "rke2-wrk-01",
+      "role": "worker · gpu",
+      "status": "Ready",
+      "cpuPercent": 72,
+      "memPercent": 63
+    },
+    {
+      "name": "rke2-wrk-02",
+      "role": "worker",
+      "status": "Ready",
+      "cpuPercent": 19,
+      "memPercent": 34
+    },
+    {
+      "name": "rke2-wrk-03",
+      "role": "worker · agents",
+      "status": "MemoryPressure",
+      "cpuPercent": 55,
+      "memPercent": 78,
+      "conditions": [
+        "MemoryPressure"
+      ]
+    },
+    {
+      "name": "coder-node-a",
+      "role": "coder workspace pool",
+      "status": "Ready",
+      "cpuPercent": 44,
+      "memPercent": 51
+    }
+  ],
+  "agents": [
+    {
+      "id": "coder-tan-rabbit-36",
+      "kind": "cursor",
+      "name": "tan-rabbit-36",
+      "detail": "Coder · surrealwolf",
+      "status": "active",
+      "task": "GH#214 · dioptra mock revision"
+    },
+    {
+      "id": "cursor-bc-11dccb",
+      "kind": "cursor",
+      "name": "cursor-cloud · bc-11dccb…",
+      "detail": "Cloud agent · private worker",
+      "status": "running",
+      "task": "GH#208 · agent fleet board"
+    },
+    {
+      "id": "coder-dk-devpod-12",
+      "kind": "cursor",
+      "name": "dk-devpod-12",
+      "detail": "Coder · idle pool",
+      "status": "idle",
+      "task": null
+    },
+    {
+      "id": "cursor-bc-9af1e2",
+      "kind": "cursor",
+      "name": "cursor-cloud · bc-9af1e2…",
+      "detail": "Cloud agent",
+      "status": "running",
+      "task": "GL#91 · harbor chart bump"
+    },
+    {
+      "id": "hermes-worker-01",
+      "kind": "hermes",
+      "name": "hermes-worker-01",
+      "detail": "vLLM · Qwen2.5-32B · GPU",
+      "status": "healthy",
+      "task": "GL#77 · toolset audit assist"
+    },
+    {
+      "id": "hermes-worker-02",
+      "kind": "hermes",
+      "name": "hermes-worker-02",
+      "detail": "vLLM · standby",
+      "status": "standby",
+      "task": null
+    },
+    {
+      "id": "hermes-router",
+      "kind": "hermes",
+      "name": "hermes-router",
+      "detail": "gateway · /v1",
+      "status": "degraded",
+      "task": "p95 410ms"
+    }
+  ],
+  "backlog": {
+    "github": {
+      "platform": "github",
+      "totalOpen": 4,
+      "top": [
+        {
+          "id": "gh-12-palworld-operator",
+          "number": 12,
+          "title": "T3: Finish smoke — client join, PVC retain, graceful stop",
+          "repo": "palworld-operator",
+          "priority": "P0",
+          "labels": [
+            "phase/test",
+            "priority/P0"
+          ],
+          "url": "https://github.com/DataKnifeAI/palworld-operator/issues/12",
+          "updatedAt": "2026-07-13T02:58:35Z"
+        },
+        {
+          "id": "gh-13-palworld-operator",
+          "number": 13,
+          "title": "T4: Negative / ops status messages",
+          "repo": "palworld-operator",
+          "priority": "P1",
+          "labels": [
+            "phase/test",
+            "priority/P1"
+          ],
+          "url": "https://github.com/DataKnifeAI/palworld-operator/issues/13",
+          "updatedAt": "2026-07-13T02:58:36Z"
+        },
+        {
+          "id": "gh-11-palworld-operator",
+          "number": 11,
+          "title": "T2: Optional envtest integration suite",
+          "repo": "palworld-operator",
+          "priority": "P1",
+          "labels": [
+            "phase/test",
+            "priority/P1"
+          ],
+          "url": "https://github.com/DataKnifeAI/palworld-operator/issues/11",
+          "updatedAt": "2026-07-13T02:58:34Z"
+        },
+        {
+          "id": "gh-10-palworld-operator",
+          "number": 10,
+          "title": "T1 follow-up: Fake-client unit tests for Reconcile loop",
+          "repo": "palworld-operator",
+          "priority": "P1",
+          "labels": [
+            "phase/test",
+            "priority/P1"
+          ],
+          "url": "https://github.com/DataKnifeAI/palworld-operator/issues/10",
+          "updatedAt": "2026-07-13T02:58:33Z"
+        }
+      ]
+    },
+    "gitlab": {
+      "platform": "gitlab",
+      "totalOpen": 39,
+      "top": [
+        {
+          "id": "gl-91",
+          "number": 91,
+          "title": "Harbor chart bump for gitops-tools",
+          "repo": "gitops-tools",
+          "priority": "P0"
+        },
+        {
+          "id": "gl-88",
+          "number": 88,
+          "title": "cert-manager Cloudflare token rotate",
+          "repo": "gitops-core",
+          "priority": "P0"
+        },
+        {
+          "id": "gl-84",
+          "number": 84,
+          "title": "Fleet cluster connection drift",
+          "repo": "gitops-fleet",
+          "priority": "P1"
+        },
+        {
+          "id": "gl-77",
+          "number": 77,
+          "title": "Hermes worker image rebuild",
+          "repo": "enodios",
+          "priority": "P1"
+        },
+        {
+          "id": "gl-71",
+          "number": 71,
+          "title": "TrueNAS CSI mount flapping",
+          "repo": "truenas-csi",
+          "priority": "P1"
+        },
+        {
+          "id": "gl-66",
+          "number": 66,
+          "title": "Proxmox VE MCP snapshot listing",
+          "repo": "proxmox-ve-mcp",
+          "priority": "P2"
+        },
+        {
+          "id": "gl-59",
+          "number": 59,
+          "title": "democratic-csi reclaim policy audit",
+          "repo": "democratic-csi",
+          "priority": "P2"
+        },
+        {
+          "id": "gl-52",
+          "number": 52,
+          "title": "gitops-dev playground namespace quotas",
+          "repo": "gitops-dev",
+          "priority": "P2"
+        },
+        {
+          "id": "gl-44",
+          "number": 44,
+          "title": "Satisfactory server PVC resize docs",
+          "repo": "satisfactory-server-k8s",
+          "priority": "P3"
+        },
+        {
+          "id": "gl-38",
+          "number": 38,
+          "title": "UniFi Network MCP rate-limit backoff",
+          "repo": "unifi-network-mcp",
+          "priority": "P3"
+        }
+      ]
+    }
+  }
+}
