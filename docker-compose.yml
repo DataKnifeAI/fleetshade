@@ -1,0 +1,32 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    environment:
+      DIOPTRA_SITE_MARKER: ${DIOPTRA_SITE_MARKER:?set DIOPTRA_SITE_MARKER}
+      DIOPTRA_ALLOWED_ORIGINS: ${DIOPTRA_ALLOWED_ORIGINS:-http://127.0.0.1:8080,http://localhost:8080}
+      DIOPTRA_API_PORT: "8787"
+      DIOPTRA_REFRESH_SECONDS: ${DIOPTRA_REFRESH_SECONDS:-30}
+      DIOPTRA_RATE_LIMIT_PER_MIN: ${DIOPTRA_RATE_LIMIT_PER_MIN:-60}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      GH_TOKEN: ${GH_TOKEN:-}
+      DIOPTRA_GITHUB_ORG: ${DIOPTRA_GITHUB_ORG:-DataKnifeAI}
+      GITLAB_TOKEN: ${GITLAB_TOKEN:-}
+      DIOPTRA_GITLAB_GROUP: ${DIOPTRA_GITLAB_GROUP:-}
+    ports:
+      - "8787:8787"
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_SITE_MARKER: ${DIOPTRA_SITE_MARKER:?set DIOPTRA_SITE_MARKER}
+        VITE_STATUS_URL: /api/status
+    ports:
+      - "8080:8080"
+    depends_on:
+      - api
+    restart: unless-stopped

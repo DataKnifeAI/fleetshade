@@ -8,6 +8,9 @@ dist/
 coverage/
 .vite/
 *.log
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
 
 tsconfig.tsbuildinfo
 *.tsbuildinfo

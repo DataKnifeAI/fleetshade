@@ -1,10 +1,13 @@
-.PHONY: install dev test build preview publish docker
+.PHONY: install dev api test build preview publish docker
 
 install:
 	npm install
 
 dev:
 	npm run dev
+
+api:
+	npm run dev:api
 
 test:
 	npm test
@@ -19,4 +22,5 @@ publish:
 	npm run publish:status
 
 docker:
-	docker build -t dioptra:local .
+	docker compose up --build
+

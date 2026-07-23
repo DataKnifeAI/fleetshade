@@ -6,6 +6,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:api": "node --env-file=.env server/index.mjs",
+    "dev:all": "node --env-file=.env server/index.mjs & vite",
+    "api": "node server/index.mjs",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
