@@ -35,15 +35,14 @@ glab repo create dk-raas/dkai/tools/dioptra \
   -d "Mirror of DataKnifeAI/dioptra for Harbor publish and Rancher deploy"
 ```
 
-### 2. GitHub secret
+### 2. GitHub secret (org-level)
 
-On `DataKnifeAI/dioptra`, set repository secret:
+`GITLAB_TOKEN` is the **shared DataKnifeAI organization secret** used by all mirror
+workflows. Do **not** create a per-repo copy unless you are intentionally overriding it.
 
-| Secret | Purpose |
-|--------|---------|
-| `GITLAB_TOKEN` | Push mirror (`write_repository` on the GitLab project) |
-
-Workflow: [`.github/workflows/mirror-gitlab.yml`](../.github/workflows/mirror-gitlab.yml) runs after CI succeeds on `main`.
+CI uses `secrets: inherit` with
+[`reusable-gitlab-mirror-push.yml`](https://github.com/DataKnifeAI/github-workflows/blob/main/.github/workflows/reusable-gitlab-mirror-push.yml)
+from [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) after a green `main` build.
 
 ### 3. GitLab CI variables (Harbor)
 

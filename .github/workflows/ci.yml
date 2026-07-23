@@ -21,3 +21,15 @@ jobs:
           VITE_SITE_MARKER: ci-test-marker-not-for-prod
           VITE_STATUS_URL: /api/status
         run: npm run build
+
+  # Org-level shared GITLAB_TOKEN (DataKnifeAI) — secrets: inherit
+  push-to-gitlab:
+    name: Push to GitLab
+    needs: [build-test]
+    if: >-
+      always() && needs.build-test.result == 'success' &&
+      github.event_name == 'push' && github.ref == 'refs/heads/main'
+    uses: DataKnifeAI/github-workflows/.github/workflows/reusable-gitlab-mirror-push.yml@main
+    secrets: inherit
+    with:
+      gitlab_mirror_path: dk-raas/dkai/tools/dioptra

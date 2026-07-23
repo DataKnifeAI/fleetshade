@@ -26,7 +26,8 @@ Canonical source is **GitHub**. A **GitLab mirror** publishes images and deploys
 | Harbor | `harbor.dataknife.net/library/dioptra` · `…/dioptra-api` |
 | Cluster | Rancher **prd-apps** · namespace `dioptra` |
 
-Details: [`docs/GITLAB_MIRROR.md`](./docs/GITLAB_MIRROR.md) · manifests: [`k8s/`](./k8s/)
+Details: [`docs/GITLAB_MIRROR.md`](./docs/GITLAB_MIRROR.md) · manifests: [`k8s/`](./k8s/)  
+Mirror auth: DataKnifeAI org secret `GITLAB_TOKEN` (shared; `secrets: inherit` in CI).
 
 - **API** refreshes live data on an interval and serves **GET-only** `/api/status`.
 - **Site** sends a shared **site marker** header (`X-Dioptra-Site`) and must come from an **allowlisted Origin**.
