@@ -32,8 +32,9 @@ GitHub / GitLab / (nodes · agents)     Dioptra site (SPA)
 **Setup** tab (diagrams):
 
 1. **Agent workspace setup** — Coder deploys template desktop spaces (`dkai-agent`, `dkai-arch`, `dkai-dev`, …) with tools/resources; outside router or inside vLLM via API  
-2. **Fleet wiring** — GitHub / GitLab → Dioptra → agents → Kubernetes  
-3. **How agents do work** — backlog → provision → reason → ship  
+2. **Agent flow** — outer lifecycle plus inner observe → plan → act → verify loops (tool loop, CI/review re-entry, blocked/handoff exits)  
+3. **Fleet wiring** — GitHub / GitLab → Dioptra → agents → Kubernetes  
+
 
 
 ## Quick start (live API + site)

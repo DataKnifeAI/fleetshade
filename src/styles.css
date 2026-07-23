@@ -286,6 +286,25 @@ section.panel.wide { grid-column: 1 / -1; }
   min-width: 980px;
 }
 
+.topo-svg.flow-svg {
+  height: 520px;
+  min-width: 1020px;
+}
+
+.topo-svg .box.loop-frame {
+  fill: rgba(18, 26, 36, 0.35);
+  stroke: rgba(94, 200, 232, 0.22);
+  stroke-dasharray: 6 4;
+}
+
+.topo-svg .link.loop {
+  fill: none;
+  stroke: rgba(94, 200, 232, 0.55);
+  stroke-width: 1.75;
+  stroke-dasharray: 6 5;
+  animation: dash 14s linear infinite;
+}
+
 .topo-svg .box {
   fill: #0b1118;
   stroke: rgba(140, 190, 210, 0.28);
