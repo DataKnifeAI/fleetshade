@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ARGUS — Agent Fleet Status</title>
+  <title>DIOPTRA — Agent Fleet</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
@@ -11,7 +11,6 @@
     :root {
       --bg-0: #0b1118;
       --bg-1: #121a24;
-      --bg-2: #182333;
       --line: rgba(140, 190, 210, 0.14);
       --text: #e6eef5;
       --muted: #7f93a8;
@@ -25,6 +24,12 @@
       --accent: #5ec8e8;
       --accent-dim: rgba(94, 200, 232, 0.12);
       --idle: #6b7f93;
+      --gh: #f0f6fc;
+      --gl: #fc6d26;
+      --p0: #e26a5c;
+      --p1: #e2b34a;
+      --p2: #5ec8e8;
+      --p3: #6b7f93;
     }
 
     * { box-sizing: border-box; }
@@ -65,7 +70,6 @@
       padding: 28px 24px 48px;
     }
 
-    /* —— Header —— */
     header.top {
       display: grid;
       grid-template-columns: 1fr auto;
@@ -75,8 +79,6 @@
       border-bottom: 1px solid var(--line);
       margin-bottom: 28px;
     }
-
-    .brand-block { min-width: 0; }
 
     .brand {
       font-family: Syne, system-ui, sans-serif;
@@ -125,7 +127,6 @@
       height: 7px;
       border-radius: 50%;
       background: var(--ok);
-      box-shadow: 0 0 0 0 rgba(61, 206, 154, 0.55);
       animation: pulse 2.4s ease-out infinite;
     }
 
@@ -135,17 +136,13 @@
       100% { box-shadow: 0 0 0 0 rgba(61, 206, 154, 0); }
     }
 
-    .clock {
-      color: var(--dim);
-      font-size: 11px;
-    }
+    .clock { color: var(--dim); font-size: 11px; }
 
-    /* —— Summary strip —— */
     .summary {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 12px;
-      margin-bottom: 28px;
+      margin-bottom: 18px;
     }
 
     .stat {
@@ -191,7 +188,6 @@
     .stat.warn .value { color: var(--warn); }
     .stat.accent .value { color: var(--accent); }
 
-    /* —— Sections —— */
     .grid {
       display: grid;
       grid-template-columns: 1.1fr 1fr;
@@ -206,9 +202,7 @@
       min-width: 0;
     }
 
-    section.panel.wide {
-      grid-column: 1 / -1;
-    }
+    section.panel.wide { grid-column: 1 / -1; }
 
     .panel-head {
       display: flex;
@@ -235,40 +229,156 @@
       text-transform: uppercase;
     }
 
-    /* nodes */
-    .nodes {
+    /* —— Topology —— */
+    .topo {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      gap: 8px 10px;
+      align-items: center;
+      padding: 8px 0 4px;
+    }
+
+    .topo-col {
       display: grid;
       gap: 10px;
+      align-content: center;
     }
+
+    .topo-col.center { justify-items: center; }
+
+    .node-box {
+      border: 1px solid var(--line);
+      background: var(--bg-0);
+      padding: 12px 14px;
+      min-width: 0;
+    }
+
+    .node-box .kicker {
+      color: var(--dim);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .node-box .title {
+      font-family: Syne, system-ui, sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: -0.02em;
+    }
+
+    .node-box .bits {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      display: grid;
+      gap: 3px;
+    }
+
+    .node-box.accent { border-color: rgba(94, 200, 232, 0.35); background: var(--accent-dim); }
+    .node-box.ok { border-color: rgba(61, 206, 154, 0.3); }
+    .node-box.warn { border-color: rgba(226, 179, 74, 0.35); }
+
+    .edge {
+      color: var(--dim);
+      font-size: 18px;
+      letter-spacing: -0.08em;
+      text-align: center;
+      padding: 0 2px;
+      user-select: none;
+    }
+
+    .edge span {
+      display: block;
+      font-size: 9px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-top: 2px;
+      color: var(--muted);
+    }
+
+    .topo-flow {
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .topo-svg {
+      width: 100%;
+      min-width: 920px;
+      height: 280px;
+      display: block;
+    }
+
+    .topo-svg .box {
+      fill: #0b1118;
+      stroke: rgba(140, 190, 210, 0.28);
+      stroke-width: 1;
+    }
+
+    .topo-svg .box.hi {
+      fill: rgba(94, 200, 232, 0.10);
+      stroke: rgba(94, 200, 232, 0.45);
+    }
+
+    .topo-svg .box.ok {
+      fill: rgba(61, 206, 154, 0.06);
+      stroke: rgba(61, 206, 154, 0.35);
+    }
+
+    .topo-svg text {
+      fill: #e6eef5;
+      font-family: Syne, system-ui, sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .topo-svg text.sub {
+      fill: #7f93a8;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 10px;
+      font-weight: 400;
+    }
+
+    .topo-svg .link {
+      fill: none;
+      stroke: rgba(94, 200, 232, 0.45);
+      stroke-width: 1.5;
+      stroke-dasharray: 4 4;
+      animation: dash 18s linear infinite;
+    }
+
+    .topo-svg .link.solid {
+      stroke-dasharray: none;
+      stroke: rgba(61, 206, 154, 0.4);
+    }
+
+    .topo-svg .link.warn {
+      stroke: rgba(226, 179, 74, 0.55);
+    }
+
+    @keyframes dash {
+      to { stroke-dashoffset: -80; }
+    }
+
+    .topo-svg marker path { fill: rgba(94, 200, 232, 0.7); }
+
+    /* nodes / agents (compact) */
+    .nodes, .agents { display: grid; gap: 10px; }
 
     .node {
       display: grid;
       grid-template-columns: 140px 1fr auto;
       gap: 14px;
       align-items: center;
-      padding: 12px 12px;
+      padding: 12px;
       background: var(--bg-0);
-      border: 1px solid transparent;
     }
 
-    .node:hover { border-color: var(--line); }
+    .node .name { font-weight: 600; }
+    .node .role { color: var(--dim); font-size: 11px; margin-top: 2px; }
 
-    .node .name {
-      font-weight: 600;
-      color: var(--text);
-    }
-
-    .node .role {
-      color: var(--dim);
-      font-size: 11px;
-      margin-top: 2px;
-    }
-
-    .bars {
-      display: grid;
-      gap: 6px;
-    }
-
+    .bars { display: grid; gap: 6px; }
     .bar-row {
       display: grid;
       grid-template-columns: 36px 1fr 40px;
@@ -290,7 +400,6 @@
     }
 
     .fill.warn { background: linear-gradient(90deg, var(--warn), #e2b34a); }
-    .fill.bad { background: linear-gradient(90deg, var(--bad), #e26a5c); }
 
     .status-pill {
       font-size: 11px;
@@ -305,12 +414,6 @@
     .status-pill.warn { color: var(--warn); background: var(--warn-dim); }
     .status-pill.bad { color: var(--bad); background: var(--bad-dim); }
     .status-pill.idle { color: var(--idle); background: rgba(107,127,147,0.12); }
-
-    /* agents */
-    .agents {
-      display: grid;
-      gap: 10px;
-    }
 
     .agent {
       display: grid;
@@ -334,16 +437,8 @@
       background: var(--accent-dim);
     }
 
-    .agent .title {
-      font-weight: 600;
-    }
-
-    .agent .detail {
-      color: var(--muted);
-      font-size: 11px;
-      margin-top: 3px;
-    }
-
+    .agent .title { font-weight: 600; }
+    .agent .detail { color: var(--muted); font-size: 11px; margin-top: 3px; }
     .agent .task {
       color: var(--dim);
       font-size: 11px;
@@ -362,72 +457,117 @@
       text-transform: uppercase;
     }
 
-    /* queue */
-    .queue-layout {
+    /* —— Backlog —— */
+    .backlog {
       display: grid;
-      grid-template-columns: 220px 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 16px;
     }
 
-    .queue-meters {
-      display: grid;
-      gap: 10px;
-      align-content: start;
+    .platform {
+      background: var(--bg-0);
+      border: 1px solid var(--line);
+      min-width: 0;
     }
 
-    .meter {
-      padding: 14px;
-      background: var(--bg-0);
+    .platform-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .platform-head .name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: Syne, system-ui, sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .mark {
+      width: 18px;
+      height: 18px;
+      display: grid;
+      place-items: center;
+      font-size: 10px;
+      font-weight: 700;
       border: 1px solid var(--line);
     }
 
-    .meter .n {
-      font-family: Syne, sans-serif;
-      font-size: 28px;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-    }
+    .mark.gh { color: var(--gh); }
+    .mark.gl { color: var(--gl); border-color: rgba(252, 109, 38, 0.45); }
 
-    .meter .l {
+    .count {
       color: var(--muted);
       font-size: 11px;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.04em;
       text-transform: uppercase;
-      margin-top: 4px;
     }
 
-    table.queue {
+    .count strong {
+      color: var(--text);
+      font-weight: 600;
+      font-size: 14px;
+      font-family: Syne, sans-serif;
+    }
+
+    table.issues {
       width: 100%;
       border-collapse: collapse;
     }
 
-    table.queue th {
+    table.issues th {
       text-align: left;
       color: var(--dim);
       font-weight: 500;
       font-size: 10px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      padding: 0 10px 10px 0;
+      padding: 10px 12px;
       border-bottom: 1px solid var(--line);
     }
 
-    table.queue td {
-      padding: 11px 10px 11px 0;
+    table.issues td {
+      padding: 9px 12px;
       border-bottom: 1px solid rgba(140, 190, 210, 0.07);
       vertical-align: top;
     }
 
-    table.queue tr:last-child td { border-bottom: 0; }
+    table.issues tr:last-child td { border-bottom: 0; }
 
-    .id { color: var(--accent); }
-    .mono-dim { color: var(--muted); }
-    .ellipsis {
+    .pri {
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+      padding: 3px 6px;
+      border: 1px solid currentColor;
+      white-space: nowrap;
+    }
+
+    .pri.p0 { color: var(--p0); background: var(--bad-dim); }
+    .pri.p1 { color: var(--p1); background: var(--warn-dim); }
+    .pri.p2 { color: var(--p2); background: var(--accent-dim); }
+    .pri.p3 { color: var(--p3); background: rgba(107,127,147,0.12); }
+
+    .issue-title {
+      display: block;
       max-width: 280px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
+    .issue-meta {
+      color: var(--dim);
+      font-size: 10px;
+      margin-top: 3px;
+    }
+
+    .id { color: var(--accent); white-space: nowrap; }
 
     footer.note {
       margin-top: 28px;
@@ -441,12 +581,6 @@
       flex-wrap: wrap;
     }
 
-    footer.note strong {
-      color: var(--muted);
-      font-weight: 500;
-    }
-
-    /* mock banner */
     .mock-banner {
       margin-bottom: 20px;
       padding: 10px 14px;
@@ -458,10 +592,15 @@
       text-transform: uppercase;
     }
 
+    @media (max-width: 1100px) {
+      .topo { grid-template-columns: 1fr; }
+      .edge { transform: rotate(90deg); padding: 6px 0; }
+      .backlog { grid-template-columns: 1fr; }
+    }
+
     @media (max-width: 960px) {
       .summary { grid-template-columns: repeat(2, 1fr); }
       .grid { grid-template-columns: 1fr; }
-      .queue-layout { grid-template-columns: 1fr; }
       .node { grid-template-columns: 1fr; }
       header.top { grid-template-columns: 1fr; }
       .meta { align-items: flex-start; text-align: left; }
@@ -469,22 +608,21 @@
 
     @media (max-width: 560px) {
       .summary { grid-template-columns: 1fr; }
-      .agent .task { max-width: 200px; }
     }
   </style>
 </head>
 <body>
   <div class="shell">
-    <div class="mock-banner">Mock v0 — static sample data · awaiting approval before implementation</div>
+    <div class="mock-banner">Mock v1 — sample data · design review</div>
 
     <header class="top">
-      <div class="brand-block">
-        <h1 class="brand">ARGUS</h1>
-        <p class="tagline">DataKnife agent fleet · public read-only status</p>
+      <div>
+        <h1 class="brand">DIOPTRA</h1>
+        <p class="tagline">DataKnife agent fleet</p>
       </div>
       <div class="meta">
-        <span class="badge"><span class="dot"></span> Live · No auth surface</span>
-        <div class="clock">UTC 2026-07-23 20:42:11 · refresh 30s</div>
+        <span class="badge"><span class="dot"></span> Live</span>
+        <div class="clock">UTC 2026-07-23 20:54:00 · refresh 30s</div>
       </div>
     </header>
 
@@ -492,7 +630,7 @@
       <div class="stat ok">
         <div class="label">Cluster nodes</div>
         <div class="value">5/5</div>
-        <div class="hint">Ready · no pressure</div>
+        <div class="hint">Ready · 1 pressure</div>
       </div>
       <div class="stat accent">
         <div class="label">Agents online</div>
@@ -500,22 +638,86 @@
         <div class="hint">4 Cursor · 3 Hermes</div>
       </div>
       <div class="stat warn">
-        <div class="label">Queue depth</div>
-        <div class="value">3</div>
-        <div class="hint">2 running · 1 waiting</div>
+        <div class="label">Open issues</div>
+        <div class="value">86</div>
+        <div class="hint">47 GitHub · 39 GitLab</div>
       </div>
       <div class="stat">
-        <div class="label">Tasks / 24h</div>
-        <div class="value">41</div>
-        <div class="hint">38 ok · 3 failed</div>
+        <div class="label">In progress</div>
+        <div class="value">9</div>
+        <div class="hint">agents on issues</div>
       </div>
     </div>
 
     <div class="grid">
+      <section class="panel wide">
+        <div class="panel-head">
+          <h2>Agent infra</h2>
+          <span class="sub">What connects to what</span>
+        </div>
+        <div class="topo-flow">
+          <svg class="topo-svg" viewBox="0 0 1100 280" role="img" aria-label="Agent infrastructure topology">
+            <defs>
+              <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" />
+              </marker>
+            </defs>
+
+            <!-- Issues -->
+            <rect class="box" x="20" y="36" width="160" height="70" />
+            <text x="36" y="64">GitHub</text>
+            <text class="sub" x="36" y="84">issues · PRs</text>
+
+            <rect class="box" x="20" y="174" width="160" height="70" />
+            <text x="36" y="202">GitLab</text>
+            <text class="sub" x="36" y="222">issues · MRs</text>
+
+            <!-- Dioptra / backlog -->
+            <rect class="box hi" x="280" y="90" width="180" height="100" />
+            <text x="298" y="128">DIOPTRA</text>
+            <text class="sub" x="298" y="148">backlog merge</text>
+            <text class="sub" x="298" y="166">priority sort</text>
+
+            <!-- Agents -->
+            <rect class="box ok" x="560" y="28" width="200" height="88" />
+            <text x="578" y="56">Cursor</text>
+            <text class="sub" x="578" y="76">cloud agents</text>
+            <text class="sub" x="578" y="94">Coder workspaces</text>
+
+            <rect class="box ok" x="560" y="164" width="200" height="88" />
+            <text x="578" y="192">Hermes</text>
+            <text class="sub" x="578" y="212">Enodios · vLLM</text>
+            <text class="sub" x="578" y="230">GPU workers</text>
+
+            <!-- Cluster -->
+            <rect class="box" x="860" y="90" width="220" height="100" />
+            <text x="878" y="128">Kubernetes</text>
+            <text class="sub" x="878" y="148">prd / nprd / coder pool</text>
+            <text class="sub" x="878" y="166">node health</text>
+
+            <!-- Links -->
+            <path class="link" d="M180 71 H250 V120 H280" marker-end="url(#arrow)" />
+            <path class="link" d="M180 209 H250 V160 H280" marker-end="url(#arrow)" />
+            <path class="link solid" d="M460 120 H520 V72 H560" marker-end="url(#arrow)" />
+            <path class="link solid" d="M460 160 H520 V208 H560" marker-end="url(#arrow)" />
+            <path class="link solid" d="M760 72 H820 V120 H860" marker-end="url(#arrow)" />
+            <path class="link warn" d="M760 208 H820 V160 H860" marker-end="url(#arrow)" />
+
+            <!-- edge labels -->
+            <text class="sub" x="200" y="52">open issues</text>
+            <text class="sub" x="200" y="248">open issues</text>
+            <text class="sub" x="470" y="100">dispatch</text>
+            <text class="sub" x="470" y="188">dispatch</text>
+            <text class="sub" x="780" y="58">runs on</text>
+            <text class="sub" x="780" y="248">runs on</text>
+          </svg>
+        </div>
+      </section>
+
       <section class="panel">
         <div class="panel-head">
           <h2>Kubernetes nodes</h2>
-          <span class="sub">prd-apps · nprd-apps</span>
+          <span class="sub">prd-apps · nprd-apps · coder</span>
         </div>
         <div class="nodes">
           <div class="node">
@@ -582,14 +784,14 @@
           <span class="sub">Cursor · Hermes</span>
         </div>
 
-        <div class="family">Cursor cloud / Coder</div>
+        <div class="family">Cursor</div>
         <div class="agents">
           <div class="agent">
             <div class="glyph">C</div>
             <div>
               <div class="title">tan-rabbit-36</div>
-              <div class="detail">Coder · surrealwolf · main agent</div>
-              <div class="task">task: argus mock approval board</div>
+              <div class="detail">Coder · surrealwolf</div>
+              <div class="task">GH#214 · dioptra mock revision</div>
             </div>
             <span class="status-pill ok">Active</span>
           </div>
@@ -598,7 +800,7 @@
             <div>
               <div class="title">cursor-cloud · bc-11dccb…</div>
               <div class="detail">Cloud agent · private worker</div>
-              <div class="task">task: agent infra dashboard</div>
+              <div class="task">GH#208 · agent fleet board</div>
             </div>
             <span class="status-pill ok">Running</span>
           </div>
@@ -616,20 +818,20 @@
             <div>
               <div class="title">cursor-cloud · bc-9af1e2…</div>
               <div class="detail">Cloud agent</div>
-              <div class="task">task: gitops-tools harbor bump</div>
+              <div class="task">GL#91 · harbor chart bump</div>
             </div>
             <span class="status-pill ok">Running</span>
           </div>
         </div>
 
-        <div class="family" style="margin-top:18px">Hermes (Enodios)</div>
+        <div class="family" style="margin-top:18px">Hermes</div>
         <div class="agents">
           <div class="agent">
             <div class="glyph">H</div>
             <div>
               <div class="title">hermes-worker-01</div>
               <div class="detail">vLLM · Qwen2.5-32B · GPU</div>
-              <div class="task">inference · 12 req/min</div>
+              <div class="task">GL#77 · toolset audit assist</div>
             </div>
             <span class="status-pill ok">Healthy</span>
           </div>
@@ -647,7 +849,7 @@
             <div>
               <div class="title">hermes-router</div>
               <div class="detail">gateway · /v1</div>
-              <div class="task">latency p95 410ms</div>
+              <div class="task">p95 410ms</div>
             </div>
             <span class="status-pill warn">Degraded</span>
           </div>
@@ -656,79 +858,212 @@
 
       <section class="panel wide">
         <div class="panel-head">
-          <h2>Task queue</h2>
-          <span class="sub">Active work · public titles only</span>
+          <h2>Issue backlog</h2>
+          <span class="sub">Top 10 by priority · per platform</span>
         </div>
-        <div class="queue-layout">
-          <div class="queue-meters">
-            <div class="meter">
-              <div class="n" style="color: var(--accent)">2</div>
-              <div class="l">Running</div>
+        <div class="backlog">
+          <div class="platform">
+            <div class="platform-head">
+              <div class="name"><span class="mark gh">GH</span> GitHub</div>
+              <div class="count">showing 10 · <strong>47</strong> open</div>
             </div>
-            <div class="meter">
-              <div class="n" style="color: var(--warn)">1</div>
-              <div class="l">Queued</div>
-            </div>
-            <div class="meter">
-              <div class="n" style="color: var(--ok)">38</div>
-              <div class="l">Done 24h</div>
-            </div>
+            <table class="issues">
+              <thead>
+                <tr>
+                  <th>Pri</th>
+                  <th>Issue</th>
+                  <th>Repo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="pri p0">P0</span></td>
+                  <td>
+                    <span class="issue-title"><span class="id">#214</span> Dioptra mock revision — backlog + topo</span>
+                    <div class="issue-meta">bug · agent-workspace</div>
+                  </td>
+                  <td class="issue-meta">agent-workspace</td>
+                </tr>
+                <tr>
+                  <td><span class="pri p0">P0</span></td>
+                  <td>
+                    <span class="issue-title"><span class="id">#208</span> Agent fleet board scaffolding</span>
+                    <div class="issue-meta">feature · dioptra</div>
+                  </td>
+                  <td class="issue-meta">dioptra</td>
+                </tr>
+                <tr>
+                  <td><span class="pri p1">P1</span></td>
+                  <td>
+                    <span class="issue-title"><span class="id">#196</span> Coder template Arch image refresh</span>
+                    <div class="issue-meta">infra · coder-templates</div>
+                  </td>
+                  <td class="issue-meta">coder-templates</td>
+                </tr>
+                <tr>
+                  <td><span class="pri p1">P1</span></td>
+                  <td>
+                    <span class="issue-title"><span class="id">#189</span> UniFi Protect MCP toolset gaps</span>
+                    <div class="issue-meta">mcp · unifi-protect-mcp</div>
+                  </td>
+                  <td class="issue-meta">unifi-protect-mcp</td>
+                </tr>
+                <tr>
+                  <td><span class="pri p1">P1</span></td>
+                  <td>
+                    <span class="issue-title"><span class="id">#181</span> Private worker pool saturation alerts</span>
+                    <div class="issue-meta">ops · agent-workspace</div>
+                  </td>
+                  <td class="issue-meta">agent-workspace</td>
+                </tr>
+                <tr>
+                  <td><span class="pri p2">P2</span></td>
+                  <td>
+                    <span class="issue-title"><span class="id">#172</span> Windrose operator readiness probes</span>
+                    <div class="issue-meta">k8s · windrose-operator</div>
+                  </td>
+                  <td class="issue-meta">windrose-operator</td>
+                </tr>
+                <tr>
+                  <td><span class="pri p2">P2</span></td>
+                  <td>
+                    <span class="issue-title"><span class="id">#165</span> Reusable workflow: node matrix cache</span>
+                    <div class="issue-meta">ci · github-workflows</div>
+                  </td>
+                  <td class="issue-meta">github-workflows</td>
+                </tr>
+                <tr>
+                  <td><span class="pri p2">P2</span></td>
+                  <td>
+                    <span class="issue-title"><span class="id">#158</span> Rancher MCP project context sticky</span>
+                    <div class="issue-meta">mcp · rancher-manager-mcp</div>
+                  </td>
+                  <td class="issue-meta">rancher-manager-mcp</td>
+                </tr>
+                <tr>
+                  <td><span class="pri p3">P3</span></td>
+                  <td>
+                    <span class="issue-title"><span class="id">#149</span> Docs: Enodios GPU node labeling</span>
+                    <div class="issue-meta">docs · enodios</div>
+                  </td>
+                  <td class="issue-meta">enodios</td>
+                </tr>
+                <tr>
+                  <td><span class="pri p3">P3</span></td>
+                  <td>
+                    <span class="issue-title"><span class="id">#140</span> Freya UI theme token cleanup</span>
+                    <div class="issue-meta">chore · freya</div>
+                  </td>
+                  <td class="issue-meta">freya</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-          <table class="queue">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Agent</th>
-                <th>State</th>
-                <th>Age</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="id">tsk-8841</td>
-                <td class="ellipsis">Agent infrastructure dashboard mock</td>
-                <td class="mono-dim">cursor-cloud</td>
-                <td><span class="status-pill ok">Running</span></td>
-                <td class="mono-dim">12m</td>
-              </tr>
-              <tr>
-                <td class="id">tsk-8837</td>
-                <td class="ellipsis">gitops-tools Harbor chart bump</td>
-                <td class="mono-dim">cursor-cloud</td>
-                <td><span class="status-pill ok">Running</span></td>
-                <td class="mono-dim">41m</td>
-              </tr>
-              <tr>
-                <td class="id">tsk-8839</td>
-                <td class="ellipsis">Hermes worker image rebuild</td>
-                <td class="mono-dim">—</td>
-                <td><span class="status-pill warn">Queued</span></td>
-                <td class="mono-dim">8m</td>
-              </tr>
-              <tr>
-                <td class="id">tsk-8822</td>
-                <td class="ellipsis">Coder template DKAI Arch refresh</td>
-                <td class="mono-dim">tan-rabbit-36</td>
-                <td><span class="status-pill idle">Done</span></td>
-                <td class="mono-dim">2h</td>
-              </tr>
-              <tr>
-                <td class="id">tsk-8818</td>
-                <td class="ellipsis">UniFi Protect MCP toolset audit</td>
-                <td class="mono-dim">hermes-worker-01</td>
-                <td><span class="status-pill idle">Done</span></td>
-                <td class="mono-dim">5h</td>
-              </tr>
-            </tbody>
-          </table>
+
+          <div class="platform">
+            <div class="platform-head">
+              <div class="name"><span class="mark gl">GL</span> GitLab</div>
+              <div class="count">showing 10 · <strong>39</strong> open</div>
+            </div>
+            <table class="issues">
+              <thead>
+                <tr>
+                  <th>Pri</th>
+                  <th>Issue</th>
+                  <th>Project</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="pri p0">P0</span></td>
+                  <td>
+                    <span class="issue-title"><span class="id">#91</span> Harbor chart bump for gitops-tools</span>
+                    <div class="issue-meta">gitops · nprd-apps</div>
+                  </td>
+                  <td class="issue-meta">gitops-tools</td>
+                </tr>
+                <tr>
+                  <td><span class="pri p0">P0</span></td>
+                  <td>
+                    <span class="issue-title"><span class="id">#88</span> cert-manager Cloudflare token rotate</span>
+                    <div class="issue-meta">gitops-core · prd</div>
+                  </td>
+                  <td class="issue-meta">gitops-core</td>
+                </tr>
+                <tr>
+                  <td><span class="pri p1">P1</span></td>
+                  <td>
+                    <span class="issue-title"><span class="id">#84</span> Fleet cluster connection drift</span>
+                    <div class="issue-meta">rancher · gitops-fleet</div>
+                  </td>
+                  <td class="issue-meta">gitops-fleet</td>
+                </tr>
+                <tr>
+                  <td><span class="pri p1">P1</span></td>
+                  <td>
+                    <span class="issue-title"><span class="id">#77</span> Hermes worker image rebuild</span>
+                    <div class="issue-meta">enodios · gpu</div>
+                  </td>
+                  <td class="issue-meta">enodios</td>
+                </tr>
+                <tr>
+                  <td><span class="pri p1">P1</span></td>
+                  <td>
+                    <span class="issue-title"><span class="id">#71</span> TrueNAS CSI mount flapping</span>
+                    <div class="issue-meta">storage · prd-apps</div>
+                  </td>
+                  <td class="issue-meta">truenas-csi</td>
+                </tr>
+                <tr>
+                  <td><span class="pri p2">P2</span></td>
+                  <td>
+                    <span class="issue-title"><span class="id">#66</span> Proxmox VE MCP snapshot listing</span>
+                    <div class="issue-meta">mcp · infra</div>
+                  </td>
+                  <td class="issue-meta">proxmox-ve-mcp</td>
+                </tr>
+                <tr>
+                  <td><span class="pri p2">P2</span></td>
+                  <td>
+                    <span class="issue-title"><span class="id">#59</span> democratic-csi reclaim policy audit</span>
+                    <div class="issue-meta">storage</div>
+                  </td>
+                  <td class="issue-meta">democratic-csi</td>
+                </tr>
+                <tr>
+                  <td><span class="pri p2">P2</span></td>
+                  <td>
+                    <span class="issue-title"><span class="id">#52</span> gitops-dev playground namespace quotas</span>
+                    <div class="issue-meta">k8s · nprd</div>
+                  </td>
+                  <td class="issue-meta">gitops-dev</td>
+                </tr>
+                <tr>
+                  <td><span class="pri p3">P3</span></td>
+                  <td>
+                    <span class="issue-title"><span class="id">#44</span> Satisfactory server PVC resize docs</span>
+                    <div class="issue-meta">games · k8s</div>
+                  </td>
+                  <td class="issue-meta">satisfactory-server-k8s</td>
+                </tr>
+                <tr>
+                  <td><span class="pri p3">P3</span></td>
+                  <td>
+                    <span class="issue-title"><span class="id">#38</span> UniFi Network MCP rate-limit backoff</span>
+                    <div class="issue-meta">mcp · network</div>
+                  </td>
+                  <td class="issue-meta">unifi-network-mcp</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
     </div>
 
     <footer class="note">
-      <div><strong>Surface:</strong> GET-only JSON snapshots · no kubectl · no agent control · no secrets</div>
-      <div><strong>Codename:</strong> Argus (Ἀργος) · DataKnifeAI</div>
+      <div>DIOPTRA · DataKnifeAI</div>
+      <div>mock sample data</div>
     </footer>
   </div>
 </body>
