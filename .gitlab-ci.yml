@@ -92,10 +92,13 @@ deploy-prd-apps:
       chmod 600 ~/.kube/config
       export KUBECONFIG=~/.kube/config
       IMAGE_TAG="${CI_COMMIT_SHORT_SHA}"
+      WEB_IMAGE="$HARBOR_REGISTRY/$HARBOR_PROJECT/$IMAGE_NAME_WEB:$IMAGE_TAG"
+      API_IMAGE="$HARBOR_REGISTRY/$HARBOR_PROJECT/$IMAGE_NAME_API:$IMAGE_TAG"
+      # Apply runtime manifests only (never secret.example.yaml)
       kubectl apply -f k8s/namespace.yaml
-      kubectl -n dioptra set image deployment/dioptra-web web="$HARBOR_REGISTRY/$HARBOR_PROJECT/$IMAGE_NAME_WEB:$IMAGE_TAG" || \
-        kubectl apply -f k8s/
-      kubectl -n dioptra set image deployment/dioptra-api api="$HARBOR_REGISTRY/$HARBOR_PROJECT/$IMAGE_NAME_API:$IMAGE_TAG" || true
-      kubectl apply -f k8s/
+      kubectl apply -f k8s/api-deployment.yaml
+      kubectl apply -f k8s/web-deployment.yaml
+      kubectl -n dioptra set image deployment/dioptra-web web="$WEB_IMAGE"
+      kubectl -n dioptra set image deployment/dioptra-api api="$API_IMAGE"
       kubectl -n dioptra rollout status deployment/dioptra-web --timeout=180s
       kubectl -n dioptra rollout status deployment/dioptra-api --timeout=180s

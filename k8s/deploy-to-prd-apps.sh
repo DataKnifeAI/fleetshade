@@ -25,7 +25,7 @@ if ! kubectl -n "$NAMESPACE" get secret harbor-registry-secret >/dev/null 2>&1; 
 fi
 
 if ! kubectl -n "$NAMESPACE" get secret dioptra-api >/dev/null 2>&1; then
-  echo "warning: secret/dioptra-api missing — create from k8s/secret.example.yaml" >&2
+  echo "warning: secret/dioptra-api missing — create from k8s/examples/secret.example.yaml" >&2
 fi
 
 kubectl apply -f k8s/api-deployment.yaml

@@ -42,44 +42,53 @@ const authCfg = {
 
 const limiter = createRateLimiter({ windowMs: 60_000, max: RATE_MAX });
 
-/** @type {{ status: any, error: string | null, refreshing: boolean }} */
+/** @type {{ status: any, error: string | null, inflight: Promise<void> | null }} */
 const cache = {
   status: readJson(resolve(root, "public/status.json"), null),
   error: null,
-  refreshing: false,
+  inflight: null,
 };
 
-async function refresh() {
-  if (cache.refreshing) return;
-  cache.refreshing = true;
-  try {
-    cache.status = await buildStatus();
-    cache.error = null;
-    console.log(
-      `[dioptra-api] refreshed ${cache.status.generatedAt} gh=${cache.status.summary.issuesGithub} gl=${cache.status.summary.issuesGitlab}`,
-    );
-  } catch (err) {
-    cache.error = err instanceof Error ? err.message : String(err);
-    console.error("[dioptra-api] refresh failed:", cache.error);
-  } finally {
-    cache.refreshing = false;
-  }
+function refresh() {
+  if (cache.inflight) return cache.inflight;
+  cache.inflight = (async () => {
+    try {
+      cache.status = await buildStatus();
+      cache.error = null;
+      console.log(
+        `[dioptra-api] refreshed ${cache.status.generatedAt} gh=${cache.status.summary.issuesGithub} gl=${cache.status.summary.issuesGitlab}`,
+      );
+    } catch (err) {
+      cache.error = err instanceof Error ? err.message : String(err);
+      console.error("[dioptra-api] refresh failed:", cache.error);
+    } finally {
+      cache.inflight = null;
+    }
+  })();
+  return cache.inflight;
 }
 
-function send(res, statusCode, body, extraHeaders = {}) {
+function send(res, req, statusCode, body, extraHeaders = {}) {
+  const method = (req.method || "GET").toUpperCase();
   const payload = typeof body === "string" ? body : JSON.stringify(body);
   const headers = {
-    "Content-Type": typeof body === "string" ? "text/plain; charset=utf-8" : "application/json; charset=utf-8",
+    "Content-Type":
+      typeof body === "string" ? "text/plain; charset=utf-8" : "application/json; charset=utf-8",
     "Cache-Control": "no-store",
     "X-Content-Type-Options": "nosniff",
+    "Content-Length": Buffer.byteLength(payload),
     ...extraHeaders,
   };
   res.writeHead(statusCode, headers);
+  if (method === "HEAD") {
+    res.end();
+    return;
+  }
   res.end(payload);
 }
 
-function deny(res, status, reason, cors = {}) {
-  send(res, status, { error: "forbidden", reason }, cors);
+function deny(res, req, status, reason, cors = {}) {
+  send(res, req, status, { error: "forbidden", reason }, cors);
 }
 
 const server = createServer(async (req, res) => {
@@ -88,22 +97,22 @@ const server = createServer(async (req, res) => {
 
   if (url.pathname === "/healthz") {
     if (method !== "GET" && method !== "HEAD") {
-      send(res, 405, "method not allowed");
+      send(res, req, 405, "method not allowed");
       return;
     }
-    send(res, 200, cache.error ? `degraded: ${cache.error}` : "ok");
+    send(res, req, 200, cache.error ? `degraded: ${cache.error}` : "ok");
     return;
   }
 
   if (!url.pathname.startsWith("/api/")) {
-    send(res, 404, { error: "not_found" });
+    send(res, req, 404, { error: "not_found" });
     return;
   }
 
   if (method === "OPTIONS") {
     const pre = authorizePreflight(req, authCfg);
     if (!pre.ok) {
-      deny(res, pre.status, pre.reason);
+      deny(res, req, pre.status, pre.reason);
       return;
     }
     res.writeHead(204, corsHeaders(pre.origin));
@@ -112,14 +121,14 @@ const server = createServer(async (req, res) => {
   }
 
   if (method !== "GET" && method !== "HEAD") {
-    send(res, 405, { error: "method_not_allowed" });
+    send(res, req, 405, { error: "method_not_allowed" });
     return;
   }
 
   const auth = authorizeRequest(req, authCfg);
   const cors = corsHeaders(auth.origin || req.headers.origin || undefined);
   if (!auth.ok) {
-    deny(res, auth.status, auth.reason, cors);
+    deny(res, req, auth.status, auth.reason, cors);
     return;
   }
 
@@ -127,6 +136,7 @@ const server = createServer(async (req, res) => {
   if (!rl.ok) {
     send(
       res,
+      req,
       429,
       { error: "rate_limited", retryAfterSec: rl.retryAfterSec },
       {
@@ -143,10 +153,16 @@ const server = createServer(async (req, res) => {
       await refresh();
     }
     if (!cache.status) {
-      send(res, 503, { error: "unavailable", reason: cache.error || "no-data" }, cors);
+      send(
+        res,
+        req,
+        503,
+        { error: "unavailable", reason: cache.error || "no-data" },
+        cors,
+      );
       return;
     }
-    send(res, 200, cache.status, {
+    send(res, req, 200, cache.status, {
       ...cors,
       "X-RateLimit-Remaining": String(rl.remaining),
       "X-Dioptra-Generated-At": cache.status.generatedAt,
@@ -154,7 +170,7 @@ const server = createServer(async (req, res) => {
     return;
   }
 
-  send(res, 404, { error: "not_found" }, cors);
+  send(res, req, 404, { error: "not_found" }, cors);
 });
 
 await refresh();

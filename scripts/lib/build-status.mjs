@@ -1,8 +1,8 @@
 /**
  * Shared status builder for publish-status CLI and the read-only API.
+ * Uses Node fetch only (no curl/gh required in the API image).
  */
 import { readFileSync, existsSync } from "node:fs";
-import { spawnSync } from "node:child_process";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -41,28 +41,48 @@ export function readJson(path, fallback) {
   return JSON.parse(readFileSync(path, "utf8"));
 }
 
-function ghApi(path, qs = "") {
-  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
-  const url = `https://api.github.com${path}${qs}`;
-  if (token) {
-    const res = spawnSync(
-      "curl",
-      [
-        "-fsSL",
-        "-H",
-        `Authorization: Bearer ${token}`,
-        "-H",
-        "Accept: application/vnd.github+json",
-        url,
-      ],
-      { encoding: "utf8" },
-    );
-    if (res.status !== 0) throw new Error(res.stderr || `curl failed ${url}`);
-    return JSON.parse(res.stdout);
+async function httpJson(url, headers = {}) {
+  const res = await fetch(url, {
+    headers: {
+      Accept: "application/json",
+      "User-Agent": "dioptra-status-builder",
+      ...headers,
+    },
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`HTTP ${res.status} ${url}${text ? `: ${text.slice(0, 200)}` : ""}`);
   }
-  const res = spawnSync("gh", ["api", `${path}${qs}`], { encoding: "utf8" });
-  if (res.status !== 0) throw new Error(res.stderr || `gh api failed ${path}`);
-  return JSON.parse(res.stdout);
+  return res.json();
+}
+
+async function ghApi(path, qs = "") {
+  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+  const headers = {
+    Accept: "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28",
+  };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return httpJson(`https://api.github.com${path}${qs}`, headers);
+}
+
+function mapGithubIssue(i, fallbackRepo) {
+  const labels = (i.labels || []).map((l) => (typeof l === "string" ? l : l.name));
+  const repo =
+    i.repository?.name ||
+    (i.repository_url || "").split("/").slice(-1)[0] ||
+    fallbackRepo ||
+    "unknown";
+  return {
+    id: `gh-${i.number}-${repo}`,
+    number: i.number,
+    title: i.title,
+    repo,
+    priority: parsePriority(labels),
+    labels,
+    url: i.html_url,
+    updatedAt: i.updated_at,
+  };
 }
 
 async function fetchGithubIssues(topN) {
@@ -74,49 +94,42 @@ async function fetchGithubIssues(topN) {
 
   /** @type {any[]} */
   let items = [];
+  let totalOpen = 0;
+
   if (repos.length === 0) {
     const q = encodeURIComponent(`org:${org} is:issue is:open`);
-    const data = ghApi("/search/issues", `?q=${q}&per_page=100&sort=updated`);
+    const data = await ghApi("/search/issues", `?q=${q}&per_page=100&sort=updated`);
     items = data.items || [];
+    totalOpen = Number(data.total_count ?? items.length);
   } else {
     for (const repo of repos) {
       const full = repo.includes("/") ? repo : `${org}/${repo}`;
       const [owner, name] = full.split("/");
-      const page = ghApi(`/repos/${owner}/${name}/issues`, "?state=open&per_page=100");
-      items.push(
-        ...page
-          .filter((i) => !i.pull_request)
-          .map((i) => ({
-            ...i,
-            repository_url: `https://api.github.com/repos/${full}`,
-          })),
+      const page = await ghApi(
+        `/repos/${owner}/${name}/issues`,
+        "?state=open&per_page=100",
       );
+      const open = page.filter((i) => !i.pull_request);
+      items.push(
+        ...open.map((i) => ({
+          ...i,
+          repository_url: `https://api.github.com/repos/${full}`,
+        })),
+      );
+      // Link header may have more pages; for totals use search per repo when needed
+      const countData = await ghApi(
+        "/search/issues",
+        `?q=${encodeURIComponent(`repo:${full} is:issue is:open`)}&per_page=1`,
+      );
+      totalOpen += Number(countData.total_count ?? open.length);
     }
   }
 
-  const mapped = items
-    .filter((i) => !i.pull_request)
-    .map((i) => {
-      const labels = (i.labels || []).map((l) => (typeof l === "string" ? l : l.name));
-      const repo =
-        i.repository?.name ||
-        (i.repository_url || "").split("/").slice(-1)[0] ||
-        "unknown";
-      return {
-        id: `gh-${i.number}-${repo}`,
-        number: i.number,
-        title: i.title,
-        repo,
-        priority: parsePriority(labels),
-        labels,
-        url: i.html_url,
-        updatedAt: i.updated_at,
-      };
-    });
+  const mapped = items.filter((i) => !i.pull_request).map((i) => mapGithubIssue(i));
 
   return {
     platform: "github",
-    totalOpen: mapped.length,
+    totalOpen: totalOpen || mapped.length,
     top: sortTop(mapped, topN),
   };
 }
@@ -127,12 +140,19 @@ async function fetchGitlabIssues(topN) {
   const gitlabUrl = (process.env.GITLAB_URL || "https://gitlab.com").replace(/\/$/, "");
   if (!token || !group) return null;
 
-  const url = `${gitlabUrl}/api/v4/groups/${encodeURIComponent(group)}/issues?state=opened&per_page=100&order_by=updated_at`;
-  const res = spawnSync("curl", ["-fsSL", "-H", `PRIVATE-TOKEN: ${token}`, url], {
-    encoding: "utf8",
+  const base = `${gitlabUrl}/api/v4/groups/${encodeURIComponent(group)}/issues?state=opened&per_page=100&order_by=updated_at`;
+  const res = await fetch(base, {
+    headers: {
+      "PRIVATE-TOKEN": token,
+      Accept: "application/json",
+      "User-Agent": "dioptra-status-builder",
+    },
   });
-  if (res.status !== 0) throw new Error(res.stderr || "gitlab fetch failed");
-  const items = JSON.parse(res.stdout);
+  if (!res.ok) throw new Error(`gitlab HTTP ${res.status}`);
+  const items = await res.json();
+  const totalHeader = res.headers.get("x-total");
+  const totalOpen = totalHeader ? Number(totalHeader) : items.length;
+
   const mapped = items.map((i) => {
     const labels = i.labels || [];
     return {
@@ -148,7 +168,7 @@ async function fetchGitlabIssues(topN) {
   });
   return {
     platform: "gitlab",
-    totalOpen: mapped.length,
+    totalOpen,
     top: sortTop(mapped, topN),
   };
 }
@@ -189,8 +209,8 @@ export async function buildStatus(options = {}) {
     };
 
   const nodesReady = nodes.filter((n) => String(n.status).toLowerCase() === "ready").length;
-  const agentsCursor = agents.filter((a) => a.kind === "cursor").length;
-  const agentsHermes = agents.filter((a) => a.kind === "hermes").length;
+  const agentsCursor = onlineCount(agents, "cursor");
+  const agentsHermes = onlineCount(agents, "hermes");
 
   return {
     generatedAt: new Date().toISOString(),
@@ -198,7 +218,7 @@ export async function buildStatus(options = {}) {
     summary: {
       nodesReady,
       nodesTotal: nodes.length,
-      agentsOnline: onlineCount(agents, "cursor") + onlineCount(agents, "hermes"),
+      agentsOnline: agentsCursor + agentsHermes,
       agentsCursor,
       agentsHermes,
       issuesOpen: github.totalOpen + gitlab.totalOpen,
