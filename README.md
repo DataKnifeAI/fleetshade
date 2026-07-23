@@ -15,6 +15,19 @@ GitHub / GitLab / (nodes · agents)     Dioptra site (SPA)
                           + rate limit
 ```
 
+### GitLab mirror → Harbor → Rancher
+
+Canonical source is **GitHub**. A **GitLab mirror** publishes images and deploys to Rancher:
+
+| | |
+|--|--|
+| GitHub | `DataKnifeAI/dioptra` |
+| GitLab mirror | [`dk-raas/dkai/tools/dioptra`](https://gitlab.com/dk-raas/dkai/tools/dioptra) |
+| Harbor | `harbor.dataknife.net/library/dioptra` · `…/dioptra-api` |
+| Cluster | Rancher **prd-apps** · namespace `dioptra` |
+
+Details: [`docs/GITLAB_MIRROR.md`](./docs/GITLAB_MIRROR.md) · manifests: [`k8s/`](./k8s/)
+
 - **API** refreshes live data on an interval and serves **GET-only** `/api/status`.
 - **Site** sends a shared **site marker** header (`X-Dioptra-Site`) and must come from an **allowlisted Origin**.
 - Scrape tokens (`GITHUB_TOKEN`, `GITLAB_TOKEN`, kube credentials) stay on the API host — never in the browser.

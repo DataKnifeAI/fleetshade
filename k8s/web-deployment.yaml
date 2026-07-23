@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dioptra-web
+  namespace: dioptra
+  labels:
+    app: dioptra-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: dioptra-web
+  template:
+    metadata:
+      labels:
+        app: dioptra-web
+    spec:
+      imagePullSecrets:
+        - name: harbor-registry-secret
+      containers:
+        - name: web
+          image: harbor.dataknife.net/library/dioptra:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dioptra-web
+  namespace: dioptra
+  labels:
+    app: dioptra-web
+spec:
+  selector:
+    app: dioptra-web
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
