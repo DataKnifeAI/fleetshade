@@ -1,5 +1,8 @@
 # DIOPTRA
 
+![DIOPTRA — agent fleet status board](docs/assets/dioptra-hero.jpg)
+
+
 **Dioptra** — DataKnife agent-fleet status board.
 
 Named for the ancient Greek surveying instrument: measure the fleet, see the angles.
